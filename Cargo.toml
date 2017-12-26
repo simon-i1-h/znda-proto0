@@ -1,0 +1,6 @@
+[package]
+name = 'znda_proto0'
+version = '0.0.1'
+authors = ['Itoh Shimon <newbee@arrow.ocn.ne.jp>']
+
+[dependencies]
