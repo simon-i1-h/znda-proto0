@@ -1,11 +1,9 @@
 // znda # インタプリタ起動
 // znda [-e 'code'] # コード実行
-// znda [--] FILENAME... # コード実行
+// znda [--] FILENAME # コード実行
 // znda (--help|help)
 // znda (--version|version)
 
-extern crate getopts;
-use getopts::Options;
 use std::env;
 use std::ffi::OsStr;
 
@@ -21,32 +19,26 @@ enum ProgMode {
 }
 
 // TODO 悪い意味で富豪的なので直す
-fn parse_opts<T>(opts: T) -> Result<(), OptParseErrorKind>
+fn parse_opts<T>(opts: T) -> Result<ProgMode, OptParseErrorKind>
     where T: IntoIterator,
           T::Item: AsRef<str>
 {
 //    let mode = Node; TODO help_flagなどを使わずにProgModeを使う?
-    let mut into_opt_e_parse = false;
+    let mut into_opt_e = false;
     let mut pieces = Vec::new();
-    let mut help_flag = false;
-    let mut version_flag = false;
     let mut filenames = Vec::new();
 
     for s in opts.into_iter() {
         let s = s.as_ref();
 
-        if help_flag || version_flag {
-            return Err(OptParseErrorKind::Error);
-        }
-
         match s {
-            "-e" => into_opt_e_parse = true,
-            "--help" | "help" => help_flag = true,
-            "--version" | "version" => version_flag = true,
+            "-e" => into_opt_e = true,
+            "--help" | "help" => return Ok(ProgMode::PrintHelp),
+            "--version" | "version" => return Ok(ProgMode::PrintVersion),
             o => {
-                if into_opt_e_parse {
+                if into_opt_e {
                     pieces.push(s.to_string());
-                    into_opt_e_parse = false;
+                    into_opt_e = false;
                 } else if !pieces.is_empty() {
                     filenames.push(s.to_string());
                 }
@@ -54,21 +46,12 @@ fn parse_opts<T>(opts: T) -> Result<(), OptParseErrorKind>
         }
     }
 
-    debug_assert!(help_flag && version_flag);
-    if help_flag {
-        // TODO print usage and exit? -> ではなく、Okを返す
-        unimplemented!()
-    } else if version_flag {
-        // TODO print version and exit? -> ではなく、Okを返す
-        unimplemented!()
-    }
-
-    if into_opt_e_parse {
+    if into_opt_e {
         // TODO return error
         unimplemented!()
     }
 
-    Ok(())
+    unimplemented!()
 }
 
 fn main() {
