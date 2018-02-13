@@ -10,19 +10,19 @@ impl Vm {
     }
 
     fn eval(&mut self, s: &str) {
-        if s == "_0" {
+        if s == "zero" {
             self.data_stack.push(0);
-        } else if s == "_1_bitor" {
+        } else if s == "set-lsbit" {
             if let Some(v) = self.data_stack.pop() {
                 self.data_stack.push(v | 1);
             } else {
-                panic!("_1_bitor: Runtime error: data stack is empty.");
+                panic!("set-lsbit: Runtime error: data stack is empty.");
             }
-        } else if s == "_1_<<" {
+        } else if s == "left-shift-1" {
             if let Some(v) = self.data_stack.pop() {
                 self.data_stack.push(v << 1);
             } else {
-                panic!("_1_<<: Runtime error: data stack is empty.");
+                panic!("left-shift-1: Runtime error: data stack is empty.");
             }
         } else if s == "print_data_stack" {
             println!("{:?}", self.data_stack);
