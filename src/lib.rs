@@ -18,7 +18,7 @@ impl Vm {
         }
     }
 
-    fn eval_comment(&mut self, tok: &str, depth: usize) {
+    fn eval_block_comment(&mut self, tok: &str, depth: usize) {
         if tok == "*/" {
             if depth == 0 {
                 self.mode = Execute;
@@ -56,10 +56,10 @@ impl Vm {
         }
     }
 
-    fn eval(&mut self, s: &str) {
+    fn eval(&mut self, tok: &str) {
         match self.mode {
-            Execute => self.eval_execute(s),
-            BlockComment{ depth: d } => self.eval_comment(s, d),
+            Execute => self.eval_execute(tok),
+            BlockComment{ depth: d } => self.eval_block_comment(tok, d),
         }
     }
 
