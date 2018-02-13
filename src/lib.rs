@@ -18,41 +18,41 @@ impl Vm {
         }
     }
 
-    fn eval_comment(&mut self, s: &str, depth: usize) {
-        if s == "*/" {
+    fn eval_comment(&mut self, tok: &str, depth: usize) {
+        if tok == "*/" {
             if depth == 0 {
                 self.mode = Execute;
             } else {
                 debug_assert!(depth - 1 < depth);
                 self.mode = BlockComment{ depth: depth - 1 };
             }
-        } else if s == "/*" {
+        } else if tok == "/*" {
                 debug_assert!(depth < depth + 1);
             self.mode = BlockComment{ depth: depth + 1 };
         }
     }
 
-    fn eval_execute(&mut self, s: &str) {
-        if s == "/*" {
+    fn eval_execute(&mut self, tok: &str) {
+        if tok == "/*" {
             self.mode = BlockComment{ depth: 0 };
-        } else if s == "zero" {
+        } else if tok == "zero" {
             self.data_stack.push(0);
-        } else if s == "set-lsbit" {
+        } else if tok == "set-lsbit" {
             if let Some(v) = self.data_stack.pop() {
                 self.data_stack.push(v | 1);
             } else {
-                panic!("{}: Runtime error: data stack is empty.", s);
+                panic!("{}: Runtime error: data stack is empty.", tok);
             }
-        } else if s == "left-shift-1" {
+        } else if tok == "left-shift-1" {
             if let Some(v) = self.data_stack.pop() {
                 self.data_stack.push(v << 1);
             } else {
-                panic!("{}: Runtime error: data stack is empty.", s);
+                panic!("{}: Runtime error: data stack is empty.", tok);
             }
-        } else if s == "print_data_stack" {
+        } else if tok == "print-data-stack" {
             println!("{:?}", self.data_stack);
         } else {
-            panic!("{}: Runtime error: invalid token.", s);
+            panic!("{}: Runtime error: invalid token.", tok);
         }
     }
 
