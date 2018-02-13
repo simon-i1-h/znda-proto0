@@ -1,4 +1,14 @@
 use Mode::*;
+use Code::*;
+
+pub enum Code {
+    Builtin(fn(&mut Vm, usize)),
+}
+
+pub struct Word {
+    name: String,
+    code: Code,
+}
 
 pub enum Mode {
     Execute,
@@ -6,6 +16,7 @@ pub enum Mode {
 }
 
 pub struct Vm {
+    pub dict: Vec<Word>,
     pub data_stack: Vec<u8>,
     pub mode: Mode,
 }
@@ -13,9 +24,48 @@ pub struct Vm {
 impl Vm {
     pub fn new() -> Self {
         Self {
+            dict: Self::new_dict(),
             data_stack: Vec::new(),
             mode: Execute,
         }
+    }
+
+    fn new_dict() -> Vec<Word> {
+        let mut ret = Vec::new();
+        ret.push(Word{ name: "/*".to_string(), code: Builtin(Self::word_start_block_comment) });
+        ret.push(Word{ name: "zero".to_string(), code: Builtin(Self::word_zero) });
+        ret.push(Word{ name: "set-lsbit".to_string(), code: Builtin(Self::word_set_lsbit) });
+        ret.push(Word{ name: "left-shift-1".to_string(), code: Builtin(Self::word_left_shift_1) });
+        ret.push(Word{ name: "print-data-stack".to_string(), code: Builtin(Self::word_print_data_stack) });
+        ret
+    }
+
+    fn word_start_block_comment(&mut self, _index: usize) {
+        self.mode = BlockComment{ depth: 0 };
+    }
+
+    fn word_zero(&mut self, _index: usize) {
+        self.data_stack.push(0);
+    }
+
+    fn word_set_lsbit(&mut self, index: usize) {
+        if let Some(v) = self.data_stack.pop() {
+            self.data_stack.push(v | 1);
+        } else {
+            panic!("{}: Runtime error: data stack is empty.", self.dict[index].name);
+        }
+    }
+
+    fn word_left_shift_1(&mut self, index: usize) {
+        if let Some(v) = self.data_stack.pop() {
+            self.data_stack.push(v << 1);
+        } else {
+            panic!("{}: Runtime error: data stack is empty.", self.dict[index].name);
+        }
+    }
+
+    fn word_print_data_stack(&mut self, _index: usize) {
+        println!("{:?}", self.data_stack);
     }
 
     fn eval_block_comment(&mut self, tok: &str, depth: usize) {
@@ -33,24 +83,18 @@ impl Vm {
     }
 
     fn eval_execute(&mut self, tok: &str) {
-        if tok == "/*" {
-            self.mode = BlockComment{ depth: 0 };
-        } else if tok == "zero" {
-            self.data_stack.push(0);
-        } else if tok == "set-lsbit" {
-            if let Some(v) = self.data_stack.pop() {
-                self.data_stack.push(v | 1);
-            } else {
-                panic!("{}: Runtime error: data stack is empty.", tok);
+        let mut index_and_builtin = None;
+
+        for (i, w) in self.dict.iter().enumerate().rev() {
+            if &*w.name == tok {
+                match w.code {
+                    Builtin(f) => index_and_builtin = Some((i, f)),
+                }
             }
-        } else if tok == "left-shift-1" {
-            if let Some(v) = self.data_stack.pop() {
-                self.data_stack.push(v << 1);
-            } else {
-                panic!("{}: Runtime error: data stack is empty.", tok);
-            }
-        } else if tok == "print-data-stack" {
-            println!("{:?}", self.data_stack);
+        }
+
+        if let Some((i, f)) = index_and_builtin {
+            f(self, i);
         } else {
             panic!("{}: Runtime error: invalid token.", tok);
         }
