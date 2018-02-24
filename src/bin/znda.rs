@@ -77,11 +77,11 @@ fn main() {
         RunScript{ path: _s } => unimplemented!(),
         PrintHelp => {
             eprint!("{}", USAGE);
-            ::std::process::exit(1);
+            std::process::exit(1);
         },
         PrintVersion => {
             eprintln!("znda-proto0    0.0.1");
-            ::std::process::exit(1);
+            std::process::exit(1);
         },
     }
 }
