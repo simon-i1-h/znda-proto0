@@ -2,6 +2,7 @@ extern crate znda_proto0;
 use std::env;
 use OptParseErrorKind::*;
 use ProgMode::*;
+use znda_proto0::vm_prelude::PRELUDE;
 
 static USAGE: &'static str = "\
 znda
@@ -57,9 +58,6 @@ fn parse_opts<T>(opts: T) -> Result<ProgMode, OptParseErrorKind>
 
     Ok(Interpret)
 }
-
-static PRELUDE: &str = r#####"
-"#####;
 
 fn main() {
     let args: Vec<String> = env::args().collect();

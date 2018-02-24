@@ -1,3 +1,5 @@
+mod vm_prelude;
+
 use Mode::*;
 use Code::*;
 
